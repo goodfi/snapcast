@@ -1,0 +1,6 @@
+{
+  "databaseURL": "https://Bartek-s-workspace-o6mptj.eu-central-1.xata.sh/db/SnapCast",
+  "codegen": {
+    "output": "xata.ts"
+  }
+}
