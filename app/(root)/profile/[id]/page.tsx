@@ -1,25 +1,51 @@
-import Header from '@/components/Header';
-import VideoCard from '@/components/VideoCard';
-import { dummyCards } from '@/constants';
-import React from 'react';
+import { redirect } from 'next/navigation';
 
-const ProfiePage = async ({ params }: ParamsWithSearch) => {
+import { getAllVideosByUser } from '@/lib//video';
+import SharedHeader from '@/components/Header';
+import VideoCard from '@/components/VideoCard';
+import EmptyState from '@/components/EmptyState';
+
+const ProfilePage = async ({ params, searchParams }: ParamsWithSearch) => {
   const { id } = await params;
+  const { query, filter } = await searchParams;
+
+  const { user, videos } = await getAllVideosByUser(id, query, filter);
+  if (!user) redirect('/404');
 
   return (
-    <div className="wrapper page">
-      <Header
-        title="Bartosz Maćkowiak"
-        subHeader="bartekmackowiak92@gmail.com"
-        userImg="/assets/images/dummy.jpg"
+    <main className="wrapper page">
+      <SharedHeader
+        subHeader={user?.email}
+        title={user?.name}
+        userImg={user?.image ?? ''}
       />
-      <div className="video-grid">
-        {dummyCards.map((card) => (
-          <VideoCard {...card} key={card.id} />
-        ))}
-      </div>
-    </div>
+
+      {videos?.length > 0 ? (
+        <section className="video-grid">
+          {videos.map(({ video }) => (
+            <VideoCard
+              key={video.id}
+              id={video.videoId}
+              title={video.title}
+              thumbnail={video.thumbnailUrl}
+              createdAt={video.createdAt}
+              userImg={user.image ?? ''}
+              username={user.name ?? 'Guest'}
+              views={video.views}
+              visibility={video.visibility}
+              duration={video.duration}
+            />
+          ))}
+        </section>
+      ) : (
+        <EmptyState
+          icon="/assets/icons/video.svg"
+          title="No Videos Available Yet"
+          description="Video will show up here once you upload them."
+        />
+      )}
+    </main>
   );
 };
 
-export default ProfiePage;
+export default ProfilePage;
